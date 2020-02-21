@@ -65,13 +65,14 @@ $submitButton.ForeColor = "Green"
 $submitButton.Add_Click({submitClick}) 
 $Form.Controls.Add($submitButton)
 
-
-# LOGIC for checking AD user and Password entered ----
 #\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
 $minNumber = 0
 $maxNumber = 10
+$numberOfInsertedValues = 7
 $specialChars = "!","@","$","%","*","?"
+
+$passwordResetLogPath = "\\yganas01\YDrive\MIS\CSMPasswordResetLog.txt"
 
 #\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
 
@@ -92,7 +93,7 @@ function generateNewPassword() {
 	$randomNumber = $rand.Next($minNumber, $maxNumber)
 	$stringNumber = $randomNumber.ToString()
 	$fullNumber = ""
-	for ($i=0; $i -lt 7; $i++) {$fullNumber += $stringNumber}
+	for ($i=0; $i -lt $numberOfInsertedValues; $i++) {$fullNumber += $stringNumber}
 	$front = (Get-Culture).TextInfo.ToTitleCase($userName.substring(0,3))
 	$randChar = $specialChars[$rand.Next(0,$specialChars.count)]
 	$pass = $($front + $fullNumber + $randChar)
@@ -104,8 +105,13 @@ function changePassword($pass) {
 	$user = $userNameInputBox.text
 	$userNameInputBox.text = ""
 	Write-Host $pass
-	Set-ADAccountPassword -Identity $user -Reset -NewPassword (ConvertTo-SecureString -AsPlainText "$pass" -Force)
-	Set-ADUser -Identity $user -ChangePasswordAtLogon $true
+	#Set-ADAccountPassword -Identity $user -Reset -NewPassword (ConvertTo-SecureString -AsPlainText "$pass" -Force)
+	#Set-ADUser -Identity $user -ChangePasswordAtLogon $true
+
+	Add-Content $passwordResetLogPath "`r`nCSM: $env:UserName
+	Date Time: $((Get-Date).ToString())
+	User: $user
+	Password changed to: $($generatedPasswordLabel.text.ToString())"
 }
 
 function submitClick(){
